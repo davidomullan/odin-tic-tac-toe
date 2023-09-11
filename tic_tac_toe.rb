@@ -10,7 +10,7 @@ class Player
     begin
       print 'Enter player name: '
       @name = gets.strip
-      raise StandardError if !defined?(@name) || @name == ''
+      raise StandardError if !defined?(name) || name == ''
     rescue StandardError
       puts 'Invalid name, try again!'
       retry
@@ -28,7 +28,7 @@ class Player
       puts 'Invalid selection, try again!'
       retry
     end
-    game.board_state[selection] = @symbol
+    game.board_state[selection] = symbol
     game.print_board
   end
 end
@@ -58,17 +58,26 @@ class Game
   end
 
   def game_over?
+    any_wins = []
     LINES.each do |line|
       if line.none? { |e| board_state.include?(e) }
-        @win_condition = line.all? { |e| board_state[e.to_i - 1] == @current_player.symbol }
+        any_wins << line.all? { |e| board_state[e.to_i - 1] == current_player.symbol }
       end
     end
 
-    @win_condition
+    @win_condition = any_wins.include?(true)
   end
 
   def draw?
     @win_condition = true if board_state.uniq.size <= 2
+  end
+
+  def whos_turn?(player1, player2)
+    @current_player = if current_player == player1
+                        player2
+                      elsif current_player == player2
+                        player1
+                      end
   end
 end
 
@@ -76,18 +85,17 @@ def play(player1, player2, game)
   until game.win_condition
     game.current_player.make_selection(game)
 
-    puts "#{game.current_player.name} won! Congrats!" if game.game_over?
-    puts "It\'s a draw! Game Over." if game.draw?
+    if game.game_over?
+      puts "#{game.current_player.name} won! Congrats!"
+    elsif game.draw?
+      puts "It\'s a draw! Game Over."
+    end
 
-    game.current_player = if game.current_player == player1
-                            player2
-                          elsif game.current_player == player2
-                            player1
-                          end
+    game.current_player = game.whos_turn?(player1, player2)
   end
 end
 
-def start_game
+def setup_game
   player1 = Player.new
   puts "Hello, #{player1.name}! Your symbol is #{player1.symbol}."
   player2 = Player.new
@@ -97,4 +105,4 @@ def start_game
   play(player1, player2, game)
 end
 
-start_game
+setup_game
