@@ -7,14 +7,7 @@ class Player
   attr_accessor :name, :symbol
 
   def initialize
-    begin
-      print 'Enter player name: '
-      @name = gets.strip
-      raise StandardError if !defined?(name) || name == ''
-    rescue StandardError
-      puts 'Invalid name, try again!'
-      retry
-    end
+    @name = valid_name
 
     @symbol = name[0]
   end
@@ -30,6 +23,22 @@ class Player
     end
     game.board_state[selection] = symbol
     game.print_board
+  end
+
+  def valid_name
+    begin
+      print 'Enter player name: '
+      desired_name = gets.strip
+      raise NameError if Array(0..10).map(&:to_s).any? { |n| n == desired_name[0] }
+      raise StandardError if !defined?(desired_name) || desired_name == ''
+    rescue NameError
+      puts 'Name cannot start with a number, try again!'
+      retry
+    rescue StandardError
+      puts 'Invalid name, try again!'
+      retry
+    end
+    desired_name
   end
 end
 
