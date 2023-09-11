@@ -35,6 +35,7 @@ end
 
 # Game Class
 class Game
+  LINES = [%w[1 2 3], %w[4 5 6], %w[7 8 9], %w[1 4 7], %w[2 5 8], %w[3 6 9], %w[1 5 9], %w[3 5 7]]
   attr_accessor :board_state, :current_player, :win_condition
 
   def initialize(first_player)
@@ -52,25 +53,13 @@ class Game
   end
 
   def game_over?
-    @win_condition = if board_state[0] == board_state[1] && board_state[1] == board_state[2]
-                       true
-                     elsif board_state[3] == board_state[4] && board_state[4] == board_state[5]
-                       true
-                     elsif board_state[6] == board_state[7] && board_state[7] == board_state[8]
-                       true
-                     elsif board_state[0] == board_state[3] && board_state[3] == board_state[6]
-                       true
-                     elsif board_state[1] == board_state[4] && board_state[4] == board_state[7]
-                       true
-                     elsif board_state[2] == board_state[5] && board_state[5] == board_state[8]
-                       true
-                     elsif board_state[0] == board_state[4] && board_state[4] == board_state[8]
-                       true
-                     elsif board_state[2] == board_state[4] && board_state[4] == board_state[6]
-                       true
-                     else
-                       false
-                     end
+    LINES.each do |line|
+      if line.none? { |e| board_state.include?(e) }
+        @win_condition = line.all? { |e| board_state[e.to_i - 1] == @current_player.symbol }
+      end
+    end
+
+    @win_condition
   end
 end
 
