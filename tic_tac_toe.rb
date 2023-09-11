@@ -19,7 +19,7 @@ class Player
     @symbol = name[0]
   end
 
-  def select_space
+  def make_selection(game)
     begin
       print "#{name}, make a selection: "
       selection = gets.strip.to_i - 1
@@ -28,7 +28,8 @@ class Player
       puts 'Invalid selection, try again!'
       retry
     end
-    selection
+    game.board_state[selection] = @symbol
+    game.print_board
   end
 end
 
@@ -73,20 +74,17 @@ class Game
   end
 end
 
-def play_game(player1, player2, game)
+def play(player1, player2, game)
   until game.win_condition
-    selection = game.current_player.select_space
-    game.board_state[selection] = game.current_player.symbol
-    game.print_board
-    if game.game_over?
-      puts "#{game.current_player.name} won! Congrats!"
-    else
-      game.current_player = if game.current_player == player1
-                              player2
-                            elsif game.current_player == player2
-                              player1
-                            end
-    end
+    game.current_player.make_selection(game)
+
+    puts "#{game.current_player.name} won! Congrats!" if game.game_over?
+
+    game.current_player = if game.current_player == player1
+                            player2
+                          elsif game.current_player == player2
+                            player1
+                          end
   end
 end
 
@@ -97,7 +95,7 @@ def start_game
   puts "Hello, #{player2.name}! Your symbol is #{player2.symbol}."
   game = Game.new(player1)
 
-  play_game(player1, player2, game)
+  play(player1, player2, game)
 end
 
 start_game
