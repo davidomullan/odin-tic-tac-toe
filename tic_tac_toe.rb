@@ -23,7 +23,7 @@ class Player
     begin
       print "#{name}, make a selection: "
       selection = gets.strip.to_i - 1
-      raise StandardError if selection.negative? || selection > 9
+      raise StandardError if selection.negative? || selection > 9 || !game.valid_selection?(selection)
     rescue StandardError
       puts 'Invalid selection, try again!'
       retry
@@ -50,6 +50,11 @@ class Game
     puts board_state[3..5].join(' | ')
     puts '---------'
     puts board_state[6..8].join(' | ')
+    puts ''
+  end
+
+  def valid_selection?(selection)
+    LINES.any? { |line| line.include?(board_state[selection]) }
   end
 
   def game_over?
@@ -61,6 +66,10 @@ class Game
 
     @win_condition
   end
+
+  def draw?
+    @win_condition = true if board_state.uniq.size <= 2
+  end
 end
 
 def play(player1, player2, game)
@@ -68,6 +77,7 @@ def play(player1, player2, game)
     game.current_player.make_selection(game)
 
     puts "#{game.current_player.name} won! Congrats!" if game.game_over?
+    puts "It\'s a draw! Game Over." if game.draw?
 
     game.current_player = if game.current_player == player1
                             player2
