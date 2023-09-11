@@ -18,67 +18,86 @@ class Player
 
     @symbol = name[0]
   end
-end
 
-def print_board(array_of_selections)
-  puts "#{array_of_selections[0]} | #{array_of_selections[1]} | #{array_of_selections[2]}"
-  puts '---------'
-  puts "#{array_of_selections[3]} | #{array_of_selections[4]} | #{array_of_selections[5]}"
-  puts '---------'
-  puts "#{array_of_selections[6]} | #{array_of_selections[7]} | #{array_of_selections[8]}"
-end
-
-def game_over?(array_of_selections)
-  if array_of_selections[0] == array_of_selections[1] && array_of_selections[1] == array_of_selections[2]
-    true
-  elsif array_of_selections[3] == array_of_selections[4] && array_of_selections[4] == array_of_selections[5]
-    true
-  elsif array_of_selections[6] == array_of_selections[7] && array_of_selections[7] == array_of_selections[8]
-    true
-  elsif array_of_selections[0] == array_of_selections[3] && array_of_selections[3] == array_of_selections[6]
-    true
-  elsif array_of_selections[1] == array_of_selections[4] && array_of_selections[4] == array_of_selections[7]
-    true
-  elsif array_of_selections[2] == array_of_selections[5] && array_of_selections[5] == array_of_selections[8]
-    true
-  elsif array_of_selections[0] == array_of_selections[4] && array_of_selections[4] == array_of_selections[8]
-    true
-  elsif array_of_selections[2] == array_of_selections[4] && array_of_selections[4] == array_of_selections[6]
-    true
-  else
-    false
+  def select_space
+    begin
+      print "#{name}, make a selection: "
+      selection = gets.strip.to_i - 1
+      raise StandardError if selection.negative? || selection > 9
+    rescue StandardError
+      puts 'Invalid selection, try again!'
+      retry
+    end
+    selection
   end
 end
 
-def get_selection(current_player)
-  puts "#{current_player.name}, make a selection: "
-  gets.strip
+# Game Class
+class Game
+  attr_accessor :board_state, :current_player, :win_condition
+
+  def initialize(first_player)
+    @board_state = %w[1 2 3 4 5 6 7 8 9]
+    print_board
+    @current_player = first_player
+  end
+
+  def print_board
+    puts board_state[0..2].join(' | ')
+    puts '---------'
+    puts board_state[3..5].join(' | ')
+    puts '---------'
+    puts board_state[6..8].join(' | ')
+  end
+
+  def game_over?
+    @win_condition = if board_state[0] == board_state[1] && board_state[1] == board_state[2]
+                       true
+                     elsif board_state[3] == board_state[4] && board_state[4] == board_state[5]
+                       true
+                     elsif board_state[6] == board_state[7] && board_state[7] == board_state[8]
+                       true
+                     elsif board_state[0] == board_state[3] && board_state[3] == board_state[6]
+                       true
+                     elsif board_state[1] == board_state[4] && board_state[4] == board_state[7]
+                       true
+                     elsif board_state[2] == board_state[5] && board_state[5] == board_state[8]
+                       true
+                     elsif board_state[0] == board_state[4] && board_state[4] == board_state[8]
+                       true
+                     elsif board_state[2] == board_state[4] && board_state[4] == board_state[6]
+                       true
+                     else
+                       false
+                     end
+  end
 end
 
-def play_game
+def play_game(player1, player2, game)
+  until game.win_condition
+    selection = game.current_player.select_space
+    game.board_state[selection] = game.current_player.symbol
+    game.print_board
+    if game.game_over?
+      puts "#{game.current_player.name} won! Congrats!"
+    else
+      game.current_player = if game.current_player == player1
+                              player2
+                            elsif game.current_player == player2
+                              player1
+                            end
+    end
+  end
+end
+
+def start_game
   player1 = Player.new
   puts "Hello, #{player1.name}! Your symbol is #{player1.symbol}."
   player2 = Player.new
   puts "Hello, #{player2.name}! Your symbol is #{player2.symbol}."
+  game = Game.new(player1)
 
-  board_state = %w[1 2 3 4 5 6 7 8 9]
-  print_board(board_state)
-
-  game_won = false
-  current_player = player1
-  until game_won
-    selection = get_selection(current_player)
-    board_state[selection.to_i - 1] = current_player.symbol
-    print_board(board_state)
-    game_won = game_over?(board_state)
-    if !game_won && current_player == player1
-      current_player = player2
-    elsif !game_won && current_player == player2
-      current_player = player1
-    end
-  end
-
-  puts "#{current_player.name} won! Congrats!"
+  play_game(player1, player2, game)
 end
 
-play_game
+start_game
